@@ -1,0 +1,22 @@
+{
+    "bandwidthProfile": {
+      "video": {
+        "dominantSpeakerPriority": "high",
+        "mode": "collaboration",
+        "renderDimensions": {
+          "high": { "height": 720, "width": 1280 },
+          "standard": { "height": 90, "width": 160 }
+        }
+      }
+    },
+    "dominantSpeaker": true,
+    "logLevel": "debug",
+    "maxAudioBitrate": 16000,
+    "preferredVideoCodecs": [{ "codec": "VP8", "simulcast": true }],
+  "video": {
+    "height": 720,
+    "frameRate": 24,
+    "width": 1280
+  },
+    "audio" : {} 
+    }

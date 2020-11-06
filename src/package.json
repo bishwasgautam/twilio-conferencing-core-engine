@@ -1,0 +1,27 @@
+{
+  "name": "twilio-conferencing-core-engine",
+  "version": "1.6.1",
+  "description": "twilio-conferencing-core-engine",
+  "main": "index.js",
+  "author": "Bishwas Gautam",
+  "scripts": {
+    "lint": "./node_modules/.bin/eslint",
+    "bundle": "browserify index.js -o dist/conferencingCoreEngine.js"
+  },
+  "dependencies": {
+    "twilio-video": "^2.4.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.0.0",
+    "eslint-plugin-vue": "^6.2.2",
+    "jsdoc": "^3.6.4"
+  },
+  "keywords": [
+    "twilio",
+    "video",
+    "conference",
+    "js",
+    "sdk"
+  ],
+  "license": "ISC"
+}
