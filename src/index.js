@@ -110,6 +110,17 @@ const TwilioVideoConferenceEngine = function () {
       publication.on("unsubscribed", (track) => {
         trackUnsubscribed({ track, participant });
       });
+
+      //Setup track mute/unmute events
+      publication.track.on(
+        "disabled",
+        trackUnsubscribed({ track: publication.track, participant })
+      );
+
+      publication.track.on(
+        "enabled",
+        trackSubscribed({ track: publication.track, participant })
+      );
     });
 
     //listen to any future track subscribe/unsubscribe events by the participant - LOCAL
@@ -118,17 +129,6 @@ const TwilioVideoConferenceEngine = function () {
     );
     participant.on("trackUnsubscribed", (track) =>
       trackUnsubscribed({ track, participant })
-    );
-
-    //Setup track mute/unmute events
-    publication.track.on(
-      "disabled",
-      trackUnsubscribed({ track: publication.track, participant })
-    );
-
-    publication.track.on(
-      "enabled",
-      trackSubscribed({ track: publication.track, participant })
     );
 
     // Handle the TrackPublications that will be published by the Participant later.
