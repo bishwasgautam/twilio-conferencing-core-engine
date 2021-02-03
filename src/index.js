@@ -112,13 +112,11 @@ const TwilioVideoConferenceEngine = function () {
       });
 
       //Setup track mute/unmute events
-      publication.track.on(
-        "disabled",
+      publication.track.on("disabled", () =>
         trackUnsubscribed({ track: publication.track, participant })
       );
 
-      publication.track.on(
-        "enabled",
+      publication.track.on("enabled", () =>
         trackSubscribed({ track: publication.track, participant })
       );
     });
