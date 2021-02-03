@@ -78,6 +78,11 @@ const TwilioVideoConferenceEngine = function () {
    * @param {any} track - the media track that was subscribed
    */
   const trackSubscribed = (track) => {
+    //Setup track mute event
+    track.on("disabled", () =>
+      trackUnsubscribed({ track: publication.track, participant })
+    );
+
     notifyOfEvent(conferenceEvents.ParticipantSubscribedTrack, track);
   };
 
@@ -86,6 +91,10 @@ const TwilioVideoConferenceEngine = function () {
    * @param {any} track - the media track that was unsubscribed
    */
   const trackUnsubscribed = (track) => {
+    //Setup track unmute event
+    track.on("enabled", () =>
+      trackSubscribed({ track: publication.track, participant })
+    );
     notifyOfEvent(conferenceEvents.ParticipantUnsubscribedTrack, track);
   };
 
@@ -110,15 +119,6 @@ const TwilioVideoConferenceEngine = function () {
       publication.on("unsubscribed", (track) => {
         trackUnsubscribed({ track, participant });
       });
-
-      //Setup track mute/unmute events
-      publication.track.on("disabled", () =>
-        trackUnsubscribed({ track: publication.track, participant })
-      );
-
-      publication.track.on("enabled", () =>
-        trackSubscribed({ track: publication.track, participant })
-      );
     });
 
     //listen to any future track subscribe/unsubscribe events by the participant - LOCAL
