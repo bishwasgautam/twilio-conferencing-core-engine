@@ -78,11 +78,6 @@ const TwilioVideoConferenceEngine = function () {
    * @param {any} track - the media track that was subscribed
    */
   const trackSubscribed = (track) => {
-    //Setup track mute event
-    track.on("disabled", () =>
-      trackUnsubscribed({ track: publication.track, participant })
-    );
-
     notifyOfEvent(conferenceEvents.ParticipantSubscribedTrack, track);
   };
 
@@ -92,26 +87,51 @@ const TwilioVideoConferenceEngine = function () {
    */
   const trackUnsubscribed = (track) => {
     //Setup track unmute event
-    track.on("enabled", () =>
-      trackSubscribed({ track: publication.track, participant })
-    );
+    if (track.on) {
+      track.on("enabled", () =>
+        trackSubscribed({ track: publication.track, participant })
+      );
+    }
+
     notifyOfEvent(conferenceEvents.ParticipantUnsubscribedTrack, track);
+  };
+
+  /**
+   *
+   * @param {any} track - media track
+   */
+  const setupTrackMuteEvents = (track) => {
+    if (track && track.on) {
+      track.on("disabled", () => {
+        trackUnsubscribed({ track: publication.track, participant });
+      });
+      track.on("enabled", () => {
+        trackSubscribed({ track: publication.track, participant });
+      });
+    }
   };
 
   /**
    *
    * @param {any} participant - the user who connected
    */
-  const participantConnected = (participant) => {
+  const participantConnected = (participant, isRemote = true) => {
     //Fire callback
     notifyOfEvent(conferenceEvents.ParticipantConnected, participant);
 
     //subscribe to tracks already published by participant
     participant.tracks.forEach((publication) => {
-      if (publication.isSubscribed || publication.track)
+      if (publication.isSubscribed || publication.track) {
+        if (isRemote && publication.track) {
+          setupTrackMuteEvents(publication.track);
+        }
         trackSubscribed({ track: publication.track, participant });
+      }
 
       publication.on("subscribed", (track) => {
+        if (isRemote) {
+          setupTrackMuteEvents(track);
+        }
         trackSubscribed({ track, participant });
       });
 
@@ -122,9 +142,13 @@ const TwilioVideoConferenceEngine = function () {
     });
 
     //listen to any future track subscribe/unsubscribe events by the participant - LOCAL
-    participant.on("trackSubscribed", (track) =>
-      trackSubscribed({ track, participant })
-    );
+    participant.on("trackSubscribed", (track) => {
+      if (isRemote) {
+        setupTrackMuteEvents(track);
+      }
+      trackSubscribed({ track, participant });
+    });
+
     participant.on("trackUnsubscribed", (track) =>
       trackUnsubscribed({ track, participant })
     );
@@ -182,7 +206,7 @@ const TwilioVideoConferenceEngine = function () {
           localStorage.setItem("userName", accessToken);
 
           //Local participant
-          participantConnected(room.localParticipant);
+          participantConnected(room.localParticipant, false);
 
           //Remote participants already connected
           room.participants.forEach(participantConnected);
@@ -191,6 +215,9 @@ const TwilioVideoConferenceEngine = function () {
 
           room.on("participantDisconnected", participantDisconnected);
 
+          room.on("trackSubscribed", (track) => {
+            setupTrackMuteEvents(track);
+          });
           //Let the client know that all participants events have been initialized
           notifyOfEvent(
             conferenceEvents.ExistingParticipantsReportingComplete,
