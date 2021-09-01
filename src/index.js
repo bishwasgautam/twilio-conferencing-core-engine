@@ -489,9 +489,15 @@ const TwilioVideoConferenceEngine = function () {
     height = height || currentConnectOptions.video.height;
     createScreenTrack(height, width)
       .then((track) => {
-        turnOffMyVideo();
         currentScreenTrack = track;
-        currentRoom.localParticipant.publishTrack(track);
+
+        if (currentRoom.localParticipant.videoTracks[0]) {
+          currentRoom.localParticipant.videoTracks[0].setPriority("low");
+        }
+
+        currentRoom.localParticipant.publishTrack(track, {
+          priority: "high", //choose among 'high', 'standard' or 'low'
+        });
       })
       .catch((e) => {
         return Promise.reject(e);
@@ -502,7 +508,10 @@ const TwilioVideoConferenceEngine = function () {
     if (currentScreenTrack) {
       currentScreenTrack.stop();
       currentScreenTrack = null;
-      turnOnMyVideo();
+
+      if (currentRoom.localParticipant.videoTracks[0]) {
+        currentRoom.localParticipant.videoTracks[0].setPriority("high");
+      }
     }
   };
 
