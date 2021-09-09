@@ -279,7 +279,8 @@ const TwilioVideoConferenceEngine = function () {
     onParticipantUnsubscribedTrack,
     onDominantSpeakerChanged,
     onExistingParticipantsReportingComplete,
-    onErrorOccured
+    onErrorOccured,
+    onDebug
   ) => {
     return {
       onRoomConnected: (room) => {
@@ -314,6 +315,9 @@ const TwilioVideoConferenceEngine = function () {
       },
       onErrorOccured: (error) => {
         if (typeof onErrorOccured !== "undefined") onErrorOccured(error);
+      },
+      onDebug: (msg) => {
+        if (typeof onDebug !== "undefined") onDebug(msg);
       },
     };
   };
