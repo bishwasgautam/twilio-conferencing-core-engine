@@ -24,6 +24,7 @@ const conferenceEvents = {
   ExistingParticipantsReportingComplete:
     "ExistingParticipantsReportingComplete",
   ErrorOccured: "ErrorOccured",
+  Debug: "Debug",
 };
 
 const MediaType = { Video: "video", Audio: "audio" };
@@ -322,8 +323,9 @@ const TwilioVideoConferenceEngine = function () {
       !currentRoom ||
       !currentRoom.localParticipant ||
       !currentRoom.localParticipant.videoTracks
-    )
+    ) {
       return;
+    }
 
     var localVideoTracks = Array.from(
       currentRoom.localParticipant.videoTracks.values()
@@ -351,8 +353,9 @@ const TwilioVideoConferenceEngine = function () {
       !currentRoom ||
       !currentRoom.localParticipant ||
       !currentRoom.localParticipant.audioTracks
-    )
+    ) {
       return;
+    }
 
     var localAudioTracks = Array.from(
       currentRoom.localParticipant.audioTracks.values()
@@ -387,8 +390,10 @@ const TwilioVideoConferenceEngine = function () {
     //call participant disconnected callback for local participant
     notifyOfEvent(
       conferenceEvents.ParticipantDisconnected,
-      currentRoom.localParticipant
+      currentRoom ? currentRoom.localParticipant : null
     );
+
+    if (!currentRoom) return;
 
     //call participant disconnected callback for all remote participants
     currentRoom.participants.forEach((participant) => {
@@ -396,9 +401,7 @@ const TwilioVideoConferenceEngine = function () {
     });
 
     var identity = localStorage.getItem("userName");
-
-    //TODO remove this in prod
-    console.log(`${identity} disconnected from room ${roomName}`);
+    notifyOfEvent(conferenceEvents.Debug, `${identity} disconnected`);
 
     localStorage.removeItem("userName");
 
@@ -491,8 +494,10 @@ const TwilioVideoConferenceEngine = function () {
       .then((track) => {
         currentScreenTrack = track;
 
-        if (currentRoom.localParticipant.videoTracks[0]) {
-          currentRoom.localParticipant.videoTracks[0].setPriority("low");
+        if (currentRoom.localParticipant.videoTracks) {
+          currentRoom.localParticipant.videoTracks.forEach((track) =>
+            track.setPriority("low")
+          );
         }
 
         currentRoom.localParticipant.publishTrack(track, {
@@ -509,8 +514,10 @@ const TwilioVideoConferenceEngine = function () {
       currentScreenTrack.stop();
       currentScreenTrack = null;
 
-      if (currentRoom.localParticipant.videoTracks[0]) {
-        currentRoom.localParticipant.videoTracks[0].setPriority("high");
+      if (currentRoom.localParticipant.videoTracks) {
+        currentRoom.localParticipant.videoTracks.forEach((track) =>
+          track.setPriority("high")
+        );
       }
     }
   };
