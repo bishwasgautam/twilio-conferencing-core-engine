@@ -5,7 +5,7 @@
   "main": "index.js",
   "author": "Bishwas Gautam",
   "scripts": {
-    "lint": "./node_modules/.bin/eslint",
+    "lint": "eslint *.js",
     "bundle": "browserify index.js -o dist/conferencingCoreEngine.js"
   },
   "dependencies": {

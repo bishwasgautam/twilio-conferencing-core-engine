@@ -89,7 +89,7 @@ const TwilioVideoConferenceEngine = function () {
   const trackUnsubscribed = (track) => {
     //Setup track unmute event
     if (track.on) {
-      track.on("enabled", () =>
+      track.on("enabled", ({ publication, participant }) =>
         trackSubscribed({ track: publication.track, participant })
       );
     }
@@ -103,10 +103,10 @@ const TwilioVideoConferenceEngine = function () {
    */
   const setupTrackMuteEvents = (track) => {
     if (track && track.on) {
-      track.on("disabled", () => {
+      track.on("disabled", ({ publication, participant }) => {
         trackUnsubscribed({ track: publication.track, participant });
       });
-      track.on("enabled", () => {
+      track.on("enabled", ({ publication, participant }) => {
         trackSubscribed({ track: publication.track, participant });
       });
     }
@@ -405,7 +405,10 @@ const TwilioVideoConferenceEngine = function () {
     });
 
     var identity = localStorage.getItem("userName");
-    notifyOfEvent(conferenceEvents.Debug, `${identity} disconnected`);
+    notifyOfEvent(
+      conferenceEvents.Debug,
+      `${identity} disconnected from room ${roomName}`
+    );
 
     localStorage.removeItem("userName");
 
