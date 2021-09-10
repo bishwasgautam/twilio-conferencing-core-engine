@@ -1,0 +1,9 @@
+*.swp
+*.*~
+project.lock.json
+node_modules
+package-lock.json
+Ascend.Relay.Web/package-lock.json
+*.tgz
+dist/
+.DS_Store
