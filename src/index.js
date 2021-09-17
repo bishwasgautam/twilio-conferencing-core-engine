@@ -483,8 +483,29 @@ const TwilioVideoConferenceEngine = function () {
   /**
    * @returns {Promise<MediaDeviceInfo[]>} the list of audio media devices
    */
-  async function listAllAudioDevices() {
+  async function listAllAudioInputDevices() {
     return await Media.getInputDevices(MediaType.Audio);
+  }
+
+  /**
+   * @returns {Promise<MediaDeviceInfo[]>} the list of audio media devices
+   */
+  async function listAllAudioOutputDevices() {
+    return await Media.getOutputDevices(MediaType.Audio);
+  }
+
+  /**
+   * @param {function} callback the function to execute when a device is added or removed, callback must handle argument MediaDeviceInfo[]
+   */
+  async function onMediaDevicesListChange(callback) {
+    if (!callback) {
+      notifyOfEvent(
+        conferenceEvents.ErrorOccured,
+        `onMediaDevicesListChange - callback was not supplied, no change handler will be registered`
+      );
+    }
+
+    return await Media.registerOnMediaDevicesListChangeHandler(callback);
   }
 
   /**
@@ -554,7 +575,9 @@ const TwilioVideoConferenceEngine = function () {
     changeVideoSource,
     changeAudioSource,
     listAllVideoDevices,
-    listAllAudioDevices,
+    listAllAudioInputDevices,
+    listAllAudioOutputDevices,
+    onMediaDevicesListChange,
     startScreenShare,
     stopScreenShare,
     getRoomCredentials,
