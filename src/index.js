@@ -46,7 +46,7 @@ const TwilioVideoConferenceEngine = function () {
 
   const fetchDeviceIds = () => {
     deviceIds = {
-      audio: localStorage.getItem("audioDeviceId"),
+      audio: localStorage.getItem("audioInputDeviceId"),
       video: localStorage.getItem("videoDeviceId"),
     };
   };
@@ -466,11 +466,11 @@ const TwilioVideoConferenceEngine = function () {
 
   /**
    *
-   * @param {string} audioDeviceId - the id of the audio device
+   * @param {string} audioInputDeviceId - the id of the audio device
    * @param {function} render -  - the function to call with the audio media stream
    */
-  const changeAudioSource = (audioDeviceId, render) => {
-    Media.applyInputDevice(MediaType.Audio, audioDeviceId, render);
+  const changeAudioSource = (audioInputDeviceId, render) => {
+    Media.applyInputDevice(MediaType.Audio, audioInputDeviceId, render);
   };
 
   /**
@@ -554,12 +554,36 @@ const TwilioVideoConferenceEngine = function () {
     return Video.isSupported;
   };
 
-  const assignDefaultAudioInputDeviceId = (audioDeviceId) => {
-    if (localStorage) localStorage.setItem("audioDeviceId", audioDeviceId);
+  const assignDefaultAudioInputDeviceId = (audioInputDeviceId) => {
+    if (localStorage)
+      localStorage.setItem("audioInputDeviceId", audioInputDeviceId);
+  };
+
+  const assignDefaultAudioOutputDeviceId = (audioInputDeviceId) => {
+    if (localStorage)
+      localStorage.setItem("audioOutputDeviceId", audioInputDeviceId);
   };
 
   const assignDefaultVideoInputDeviceId = (videoDeviceId) => {
     if (localStorage) localStorage.setItem("videoDeviceId", videoDeviceId);
+  };
+
+  const clearDefaultAudioInputDeviceId = () => {
+    if (localStorage) localStorage.removeItem("audioInputDeviceId");
+  };
+
+  const clearDefaultAudioOutputDeviceId = () => {
+    if (localStorage) localStorage.removeItem("audioOutputDeviceId");
+  };
+
+  const clearDefaultVideoInputDeviceId = () => {
+    if (localStorage) localStorage.removeItem("videoDeviceId");
+  };
+
+  const clearAllDefaultMediaDeviceIds = () => {
+    clearDefaultAudioInputDeviceId();
+    clearDefaultAudioOutputDeviceId();
+    clearDefaultVideoInputDeviceId();
   };
 
   //Public API
@@ -585,7 +609,12 @@ const TwilioVideoConferenceEngine = function () {
     selectDefaultVideoSource,
     selectDefaultAudioSource,
     assignDefaultAudioInputDeviceId,
+    assignDefaultAudioOutputDeviceId,
     assignDefaultVideoInputDeviceId,
+    clearDefaultAudioInputDeviceId,
+    clearDefaultAudioOutputDeviceId,
+    clearDefaultVideoInputDeviceId,
+    clearAllDefaultMediaDeviceIds,
     isMobile: isMobile,
     getUrlParams,
     addUrlParams,
