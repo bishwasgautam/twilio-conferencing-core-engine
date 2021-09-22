@@ -73,8 +73,10 @@ async function registerOnMediaDevicesListChangeHandler(callback) {
   ensureGetMediaCalled()
     .then(async () => {
       navigator.mediaDevices.ondevicechange = () => {
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        callback(devices);
+        navigator.mediaDevices
+          .enumerateDevices()
+          .then((devices) => callback(devices))
+          .catch(() => callback(null));
       };
     })
     .catch(() => callback(null));
