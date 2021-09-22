@@ -66,17 +66,18 @@ async function getOutputDevices(kind) {
 }
 
 /**
- * 
+ *
  * @param {function} callback the function to invoke with the list of new array of media devices
  */
-async function registerOnMediaDevicesListChangeHandler(callback){
-    navigator.mediaDevices.ondevicechange = () => {
-        ensureGetMediaCalled()
-        .then(async () => {
-            const devices = await navigator.mediaDevices.enumerateDevices();
-            callback(devices);
-        })
-        .catch(() => callback(null));
+async function registerOnMediaDevicesListChangeHandler(callback) {
+  ensureGetMediaCalled()
+    .then(async () => {
+      navigator.mediaDevices.ondevicechange = () => {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        callback(devices);
+      };
+    })
+    .catch(() => callback(null));
 }
 
 /**
