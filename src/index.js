@@ -425,8 +425,12 @@ const TwilioVideoConferenceEngine = function () {
     Media.selectDefaultMedia(MediaType.Video, render);
   };
 
-  async function turnOnMyVideo() {
+  async function turnOnMyVideo(deviceId) {
     if (typeof currentRoom === "undefined") return;
+
+    if (deviceId && currentConnectOptions.video) {
+      currentConnectOptions.video.deviceId = deviceId;
+    }
 
     if (currentConnectOptions.video && currentConnectOptions.video.deviceId) {
       var localVideoTrack = await Video.createLocalVideoTrack(
@@ -444,9 +448,11 @@ const TwilioVideoConferenceEngine = function () {
     Media.selectDefaultMedia(MediaType.Audio, render);
   };
 
-  async function turnOnMyAudio() {
+  async function turnOnMyAudio(deviceId) {
     if (typeof currentRoom === "undefined") return;
-
+    if (deviceId && currentConnectOptions.audio) {
+      currentConnectOptions.audio.deviceId = deviceId;
+    }
     if (currentConnectOptions.audio && currentConnectOptions.audio.deviceId) {
       var localAudioTrack = await Video.createLocalAudioTrack(
         currentConnectOptions.audio
