@@ -226,8 +226,6 @@ const TwilioVideoConferenceEngine = function () {
 
           currentRoom = room;
 
-          localStorage.setItem("userName", accessToken);
-
           //Local participant
           participantConnected(room.localParticipant, false);
 
@@ -426,13 +424,7 @@ const TwilioVideoConferenceEngine = function () {
       notifyOfEvent(conferenceEvents.ParticipantDisconnected, participant);
     });
 
-    var identity = localStorage.getItem("userName");
-    notifyOfEvent(
-      conferenceEvents.Debug,
-      `${identity} disconnected from room ${roomName}`
-    );
-
-    localStorage.removeItem("userName");
+    notifyOfEvent(conferenceEvents.Debug, `Disconnected from room ${roomName}`);
 
     if (currentRoom) currentRoom.disconnect();
 
