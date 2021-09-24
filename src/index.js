@@ -170,13 +170,13 @@ const TwilioVideoConferenceEngine = function () {
    * @param {object} connectOptions
    */
   async function joinRoom(accessToken, roomName, connectOptions) {
-    if (typeof accessToken === "undefined")
+    if (typeof accessToken === "undefined" || !accessToken)
       throw new Error("User access token not supplied");
 
-    if (typeof roomName === "undefined")
+    if (typeof roomName === "undefined" || !roomName)
       throw new Error("Room name is not supplied");
 
-    if (typeof eventCallbacks === "undefined")
+    if (typeof eventCallbacks === "undefined" || !eventCallbacks)
       throw new Error(
         "Event callbacks not registered, please register and initialize event callbacks"
       );
@@ -185,6 +185,14 @@ const TwilioVideoConferenceEngine = function () {
     connectOptions.name = roomName;
 
     if (typeof deviceIds === "undefined") fetchDeviceIds();
+
+    if (typeof deviceIds.audio === "undefined" || !deviceIds.audio) {
+      throw new Error("Sorry, can't access audio - no device id found");
+    }
+
+    if (typeof deviceIds.video === "undefined" || !deviceIds.video) {
+      throw new Error("Sorry, can't access video - no device id found");
+    }
 
     // Add the specified audio device ID to ConnectOptions.
     if (connectOptions.audio)
@@ -565,9 +573,9 @@ const TwilioVideoConferenceEngine = function () {
       localStorage.setItem("audioInputDeviceId", audioInputDeviceId);
   };
 
-  const assignDefaultAudioOutputDeviceId = (audioInputDeviceId) => {
+  const assignDefaultAudioOutputDeviceId = (audioOutputDeviceId) => {
     if (localStorage)
-      localStorage.setItem("audioOutputDeviceId", audioInputDeviceId);
+      localStorage.setItem("audioOutputDeviceId", audioOutputDeviceId);
   };
 
   const assignDefaultVideoInputDeviceId = (videoDeviceId) => {
