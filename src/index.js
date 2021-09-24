@@ -184,23 +184,37 @@ const TwilioVideoConferenceEngine = function () {
     connectOptions = connectOptions || defaultConnectOptions;
     connectOptions.name = roomName;
 
-    if (typeof deviceIds === "undefined") fetchDeviceIds();
-
-    if (typeof deviceIds.audio === "undefined" || !deviceIds.audio) {
-      throw new Error("Sorry, can't access audio - no device id found");
-    }
-
-    if (typeof deviceIds.video === "undefined" || !deviceIds.video) {
-      throw new Error("Sorry, can't access video - no device id found");
+    if (typeof deviceIds === "undefined") {
+      fetchDeviceIds();
     }
 
     // Add the specified audio device ID to ConnectOptions.
-    if (connectOptions.audio)
+    if (connectOptions.audio && !connectOptions.audio.deviceId) {
       connectOptions.audio.deviceId = { exact: deviceIds.audio };
+    } else if (!connectOptions.audio) {
+      throw new Error("Sorry no audio info found");
+    }
 
     // Add the specified video device ID to ConnectOptions.
-    if (connectOptions.video)
+    if (connectOptions.video && !connectOptions.video.deviceId) {
       connectOptions.video.deviceId = { exact: deviceIds.video };
+    } else if (!connectOptions.video) {
+      throw new Error("Sorry no video info found");
+    }
+
+    if (
+      typeof connectOptions.audio.deviceId === "undefined" ||
+      !connectOptions.audio.deviceId
+    ) {
+      throw new Error("Sorry, can't access audio - no device id found");
+    }
+
+    if (
+      typeof connectOptions.video.deviceId === "undefined" ||
+      !connectOptions.video.deviceId
+    ) {
+      throw new Error("Sorry, can't access video - no device id found");
+    }
 
     currentConnectOptions = connectOptions;
 
