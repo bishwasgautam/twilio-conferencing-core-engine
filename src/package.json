@@ -9,7 +9,7 @@
     "bundle": "browserify index.js -o dist/conferencingCoreEngine.js"
   },
   "dependencies": {
-    "twilio-video": "^2.14.0"
+    "twilio-video": "^2.17.1"
   },
   "devDependencies": {
     "eslint": "^7.0.0",
