@@ -1,6 +1,6 @@
 {
   "name": "twilio-conferencing-core-engine",
-  "version": "1.8.7",
+  "version": "1.8.9",
   "description": "twilio-conferencing-core-engine",
   "main": "index.js",
   "author": "Bishwas Gautam",
@@ -9,7 +9,7 @@
     "bundle": "browserify index.js -o dist/conferencingCoreEngine.js"
   },
   "dependencies": {
-    "twilio-video": "2.14.0"
+    "twilio-video": "^2.14.0"
   },
   "devDependencies": {
     "eslint": "^7.0.0",

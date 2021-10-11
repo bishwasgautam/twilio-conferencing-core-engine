@@ -507,7 +507,7 @@ const TwilioVideoConferenceEngine = function () {
     return await Media.getInputDevices(MediaType.Audio);
   }
 
-  /**
+  /*
    * @returns {Promise<MediaDeviceInfo[]>} the list of audio media devices
    */
   async function listAllAudioOutputDevices() {
