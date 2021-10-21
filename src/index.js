@@ -501,6 +501,14 @@ const TwilioVideoConferenceEngine = function () {
   }
 
   /**
+   * @deprecated Please use listAllAudioInputDevices and listAllAudioOutputDevices
+   * @returns {Promise<MediaDeviceInfo[]>} the list of audio media devices
+   */
+  async function listAllAudioDevices() {
+    return await Media.getInputDevices(MediaType.Audio);
+  }
+
+  /**
    * @returns {Promise<MediaDeviceInfo[]>} the list of audio media devices
    */
   async function listAllAudioInputDevices() {
@@ -538,23 +546,31 @@ const TwilioVideoConferenceEngine = function () {
   const startScreenShare = async (height, width) => {
     width = width || currentConnectOptions.video.width;
     height = height || currentConnectOptions.video.height;
-    createScreenTrack(height, width)
-      .then((track) => {
-        currentScreenTrack = track;
+    return new Promise((resolve, reject) => {
+      createScreenTrack(height, width)
+        .then((track) => {
+          if (track) {
+            currentScreenTrack = track;
 
-        if (currentRoom.localParticipant.videoTracks) {
-          currentRoom.localParticipant.videoTracks.forEach((track) =>
-            track.setPriority("low")
-          );
-        }
+            if (currentRoom.localParticipant.videoTracks) {
+              currentRoom.localParticipant.videoTracks.forEach((track) =>
+                track.setPriority("low")
+              );
+            }
 
-        currentRoom.localParticipant.publishTrack(track, {
-          priority: "high", //choose among 'high', 'standard' or 'low'
+            currentRoom.localParticipant.publishTrack(track, {
+              priority: "high", //choose among 'high', 'standard' or 'low'
+            });
+
+            resolve(true);
+          }
+
+          resolve(false);
+        })
+        .catch((e) => {
+          reject(e);
         });
-      })
-      .catch((e) => {
-        return Promise.reject(e);
-      });
+    });
   };
 
   const stopScreenShare = () => {
@@ -619,6 +635,7 @@ const TwilioVideoConferenceEngine = function () {
     changeVideoSource,
     changeAudioSource,
     listAllVideoDevices,
+    listAllAudioDevices,
     listAllAudioInputDevices,
     listAllAudioOutputDevices,
     onMediaDevicesListChange,
