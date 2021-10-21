@@ -342,13 +342,73 @@ const TwilioVideoConferenceEngine = function () {
     };
   };
 
-  const turnOffMyVideo = () => {
+  /**
+   * Turn on audio track
+   * @returns {Promise<void>}
+   */
+  const turnOnMyAudio = async (deviceId) => {
+    if (typeof currentRoom === "undefined") {
+      Promise.reject("Can't turn on audio - room is null");
+    }
+
+    if (deviceId && currentConnectOptions.audio) {
+      currentConnectOptions.audio.deviceId = deviceId;
+    }
+    if (currentConnectOptions.audio && currentConnectOptions.audio.deviceId) {
+      var localAudioTrack = await Video.createLocalAudioTrack(
+        currentConnectOptions.audio
+      );
+
+      currentRoom.localParticipant
+        .publishTrack(localAudioTrack)
+        .then(() => Promise.resolve())
+        .catch((e) => {
+          Promise.reject(`Could not publish audio track ${e.message}`);
+        });
+    } else {
+      Promise.reject("Can't turn on audio - Audio device id not found");
+    }
+  };
+
+  /**
+   * Turn on video track
+   * @returns {Promise<void>}
+   */
+  const turnOnMyVideo = async (deviceId) => {
+    if (typeof currentRoom === "undefined") {
+      Promise.reject("Can't turn on video - room is null");
+    }
+
+    if (deviceId && currentConnectOptions.video) {
+      currentConnectOptions.video.deviceId = deviceId;
+    }
+
+    if (currentConnectOptions.video && currentConnectOptions.video.deviceId) {
+      var localVideoTrack = await Video.createLocalVideoTrack(
+        currentConnectOptions.video
+      );
+      currentRoom.localParticipant
+        .publishTrack(localVideoTrack)
+        .then(() => Promise.resolve())
+        .catch((e) => {
+          Promise.reject(`Could not publish video track - ${e.message}`);
+        });
+    } else {
+      Promise.reject("Can't turn on video - Video device id not found");
+    }
+  };
+
+  /**
+   * Turn off current video track
+   * @returns {Promise<void>}
+   */
+  const turnOffMyVideo = async () => {
     if (
       !currentRoom ||
       !currentRoom.localParticipant ||
       !currentRoom.localParticipant.videoTracks
     ) {
-      return;
+      Promise.reject("Room, local participant or video track info is missing");
     }
 
     var localVideoTracks = Array.from(
@@ -358,27 +418,43 @@ const TwilioVideoConferenceEngine = function () {
     if (localVideoTracks.length) {
       var localVideoTrack = localVideoTracks[0].track;
       if (localVideoTrack) {
-        currentRoom.localParticipant.unpublishTrack(localVideoTrack);
-        localVideoTrack.stop();
+        try {
+          currentRoom.localParticipant.unpublishTrack(localVideoTrack);
+          localVideoTrack.stop();
 
-        //https://github.com/twilio/twilio-video.js/issues/656#issuecomment-499207086
-        //This event is not fired by default for a local participant
-        //Force fire
-        trackUnsubscribed({
-          track: { kind: MediaType.Video },
-          participant: currentRoom.localParticipant,
-        });
+          //https://github.com/twilio/twilio-video.js/issues/656#issuecomment-499207086
+          //This event is not fired by default for a local participant
+          //Force fire
+          trackUnsubscribed({
+            track: { kind: MediaType.Video },
+            participant: currentRoom.localParticipant,
+          });
+
+          Promise.resolve();
+        } catch (e) {
+          Promise.reject(
+            `An error occured while stopping video track - ${e.message}`
+          );
+        }
+      } else {
+        Promise.reject("No video track info found to unpublish");
       }
+    } else {
+      Promise.reject("No video tracks found to unpublish");
     }
   };
 
-  const turnOffMyAudio = () => {
+  /**
+   * Turn off current audio track
+   * @returns {Promise<void>}
+   */
+  const turnOffMyAudio = async () => {
     if (
       !currentRoom ||
       !currentRoom.localParticipant ||
       !currentRoom.localParticipant.audioTracks
     ) {
-      return;
+      Promise.reject("Room, local participant or audio track info is missing");
     }
 
     var localAudioTracks = Array.from(
@@ -388,17 +464,90 @@ const TwilioVideoConferenceEngine = function () {
     if (localAudioTracks.length) {
       var localAudioTrack = localAudioTracks[0].track;
       if (localAudioTrack) {
-        currentRoom.localParticipant.unpublishTrack(localAudioTrack);
-        localAudioTrack.stop();
+        try {
+          currentRoom.localParticipant.unpublishTrack(localAudioTrack);
+          localAudioTrack.stop();
 
-        //https://github.com/twilio/twilio-video.js/issues/656#issuecomment-499207086
-        //This event is not fired by default for a local participant
-        //Force fire
-        trackUnsubscribed({
-          track: { kind: MediaType.Audio },
-          participant: currentRoom.localParticipant,
-        });
+          //https://github.com/twilio/twilio-video.js/issues/656#issuecomment-499207086
+          //This event is not fired by default for a local participant
+          //Force fire
+          trackUnsubscribed({
+            track: { kind: MediaType.Audio },
+            participant: currentRoom.localParticipant,
+          });
+          Promise.resolve();
+        } catch (e) {
+          Promise.reject(
+            `An error occured while stopping audio track - ${e.message}`
+          );
+        }
+      } else {
+        Promise.reject("No audio track info found to unpublish");
       }
+    } else {
+      Promise.reject("No audio track found to unpublish");
+    }
+  };
+
+  /**
+   * Create a LocalVideoTrack for your screen. You can then share it
+   * with other Participants in the Room.
+   * @param {number} height - Desired vertical resolution in pixels
+   * @param {number} width - Desired horizontal resolution in pixels
+   * @returns {Promise<LocalVideoTrack>}
+   */
+  const startScreenShare = async (height, width) => {
+    width = width || currentConnectOptions.video.width;
+    height = height || currentConnectOptions.video.height;
+
+    createScreenTrack(height, width)
+      .then((track) => {
+        if (track) {
+          currentScreenTrack = track;
+
+          if (currentRoom.localParticipant.videoTracks) {
+            currentRoom.localParticipant.videoTracks.forEach((track) =>
+              track.setPriority("low")
+            );
+          }
+
+          currentRoom.localParticipant
+            .publishTrack(track, {
+              priority: "high", //choose among 'high', 'standard' or 'low'
+            })
+            .then(() => Promise.resolve())
+            .catch((e) => {
+              Promise.reject(`Could not publish video track ${e.message}`);
+            });
+        }
+      })
+      .catch((e) => {
+        Promise.reject(
+          `An error occured while starting screen share - ${e.message}`
+        );
+      });
+  };
+
+  /**
+   * Stop screen sharing
+   * @returns {Promise<void>}
+   */
+  const stopScreenShare = async () => {
+    try {
+      if (currentScreenTrack) {
+        currentScreenTrack.stop();
+        currentScreenTrack = null;
+
+        if (currentRoom.localParticipant.videoTracks) {
+          currentRoom.localParticipant.videoTracks.forEach((track) =>
+            track.setPriority("high")
+          );
+        }
+
+        Promise.resolve();
+      }
+    } catch (e) {
+      Promise.reject(`Error when stopping screen track: ${e.message}`);
     }
   };
 
@@ -439,21 +588,6 @@ const TwilioVideoConferenceEngine = function () {
     Media.selectDefaultMedia(MediaType.Video, render);
   };
 
-  async function turnOnMyVideo(deviceId) {
-    if (typeof currentRoom === "undefined") return;
-
-    if (deviceId && currentConnectOptions.video) {
-      currentConnectOptions.video.deviceId = deviceId;
-    }
-
-    if (currentConnectOptions.video && currentConnectOptions.video.deviceId) {
-      var localVideoTrack = await Video.createLocalVideoTrack(
-        currentConnectOptions.video
-      );
-      await currentRoom.localParticipant.publishTrack(localVideoTrack);
-    }
-  }
-
   /**
    *
    * @param {function} render - the function to call with the audio media stream
@@ -461,19 +595,6 @@ const TwilioVideoConferenceEngine = function () {
   const selectDefaultAudioSource = (render) => {
     Media.selectDefaultMedia(MediaType.Audio, render);
   };
-
-  async function turnOnMyAudio(deviceId) {
-    if (typeof currentRoom === "undefined") return;
-    if (deviceId && currentConnectOptions.audio) {
-      currentConnectOptions.audio.deviceId = deviceId;
-    }
-    if (currentConnectOptions.audio && currentConnectOptions.audio.deviceId) {
-      var localAudioTrack = await Video.createLocalAudioTrack(
-        currentConnectOptions.audio
-      );
-      await currentRoom.localParticipant.publishTrack(localAudioTrack);
-    }
-  }
 
   /**
    *
@@ -535,56 +656,6 @@ const TwilioVideoConferenceEngine = function () {
 
     return await Media.registerOnMediaDevicesListChangeHandler(callback);
   }
-
-  /**
-   * Create a LocalVideoTrack for your screen. You can then share it
-   * with other Participants in the Room.
-   * @param {number} height - Desired vertical resolution in pixels
-   * @param {number} width - Desired horizontal resolution in pixels
-   * @returns {Promise<LocalVideoTrack>}
-   */
-  const startScreenShare = async (height, width) => {
-    width = width || currentConnectOptions.video.width;
-    height = height || currentConnectOptions.video.height;
-    return new Promise((resolve, reject) => {
-      createScreenTrack(height, width)
-        .then((track) => {
-          if (track) {
-            currentScreenTrack = track;
-
-            if (currentRoom.localParticipant.videoTracks) {
-              currentRoom.localParticipant.videoTracks.forEach((track) =>
-                track.setPriority("low")
-              );
-            }
-
-            currentRoom.localParticipant.publishTrack(track, {
-              priority: "high", //choose among 'high', 'standard' or 'low'
-            });
-
-            resolve(true);
-          }
-
-          resolve(false);
-        })
-        .catch((e) => {
-          reject(e);
-        });
-    });
-  };
-
-  const stopScreenShare = () => {
-    if (currentScreenTrack) {
-      currentScreenTrack.stop();
-      currentScreenTrack = null;
-
-      if (currentRoom.localParticipant.videoTracks) {
-        currentRoom.localParticipant.videoTracks.forEach((track) =>
-          track.setPriority("high")
-        );
-      }
-    }
-  };
 
   const isBrowserSupported = () => {
     return Video.isSupported;
