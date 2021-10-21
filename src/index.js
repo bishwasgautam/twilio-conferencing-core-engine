@@ -648,28 +648,28 @@ const TwilioVideoConferenceEngine = function () {
    * @deprecated Please use listAllAudioInputDevices and listAllAudioOutputDevices
    * @returns {Promise<MediaDeviceInfo[]>} the list of audio media devices
    */
-  const listAllAudioDevices = () => {
+  const listAllAudioDevices = async () => {
     return await Media.getInputDevices(MediaType.Audio);
   };
 
   /**
    * @returns {Promise<MediaDeviceInfo[]>} the list of audio media devices
    */
-  const listAllAudioInputDevices = () => {
+  const listAllAudioInputDevices = async () => {
     return await Media.getInputDevices(MediaType.Audio);
   };
 
   /*
    * @returns {Promise<MediaDeviceInfo[]>} the list of audio media devices
    */
-  const listAllAudioOutputDevices = () => {
+  const listAllAudioOutputDevices = async () => {
     return await Media.getOutputDevices(MediaType.Audio);
   };
 
   /**
    * @param {function} callback the function to execute when a device is added or removed, callback must handle argument MediaDeviceInfo[]
    */
-  const onMediaDevicesListChange = (callback) => {
+  const onMediaDevicesListChange = async (callback) => {
     if (!callback) {
       notifyOfEvent(
         conferenceEvents.ErrorOccured,
