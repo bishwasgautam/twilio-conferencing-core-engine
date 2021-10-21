@@ -169,7 +169,7 @@ const TwilioVideoConferenceEngine = function () {
    * @param {string} roomName
    * @param {object} connectOptions
    */
-  async function joinRoom(accessToken, roomName, connectOptions) {
+  const joinRoom = async (accessToken, roomName, connectOptions) => {
     if (typeof accessToken === "undefined" || !accessToken)
       throw new Error("User access token not supplied");
 
@@ -260,13 +260,13 @@ const TwilioVideoConferenceEngine = function () {
           reject(error);
         });
     });
-  }
+  };
 
   /**
    * @param {string} token
    * @param {object} event_callbacks
    */
-  var init = (event_callbacks) => {
+  const init = (event_callbacks) => {
     if (typeof event_callbacks === "undefined")
       throw new Error("Init without Event callbacks");
 
@@ -640,36 +640,36 @@ const TwilioVideoConferenceEngine = function () {
   /**
    * @returns {Promise<MediaDeviceInfo[]>} the list of video media devices
    */
-  async function listAllVideoDevices() {
+  const listAllVideoDevices = async () => {
     return await Media.getInputDevices(MediaType.Video);
-  }
+  };
 
   /**
    * @deprecated Please use listAllAudioInputDevices and listAllAudioOutputDevices
    * @returns {Promise<MediaDeviceInfo[]>} the list of audio media devices
    */
-  async function listAllAudioDevices() {
+  const listAllAudioDevices = () => {
     return await Media.getInputDevices(MediaType.Audio);
-  }
+  };
 
   /**
    * @returns {Promise<MediaDeviceInfo[]>} the list of audio media devices
    */
-  async function listAllAudioInputDevices() {
+  const listAllAudioInputDevices = () => {
     return await Media.getInputDevices(MediaType.Audio);
-  }
+  };
 
   /*
    * @returns {Promise<MediaDeviceInfo[]>} the list of audio media devices
    */
-  async function listAllAudioOutputDevices() {
+  const listAllAudioOutputDevices = () => {
     return await Media.getOutputDevices(MediaType.Audio);
-  }
+  };
 
   /**
    * @param {function} callback the function to execute when a device is added or removed, callback must handle argument MediaDeviceInfo[]
    */
-  async function onMediaDevicesListChange(callback) {
+  const onMediaDevicesListChange = (callback) => {
     if (!callback) {
       notifyOfEvent(
         conferenceEvents.ErrorOccured,
@@ -678,7 +678,7 @@ const TwilioVideoConferenceEngine = function () {
     }
 
     return await Media.registerOnMediaDevicesListChangeHandler(callback);
-  }
+  };
 
   const isBrowserSupported = () => {
     return Video.isSupported;
