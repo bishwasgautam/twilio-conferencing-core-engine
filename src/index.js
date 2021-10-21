@@ -356,16 +356,22 @@ const TwilioVideoConferenceEngine = function () {
         currentConnectOptions.audio.deviceId = deviceId;
       }
       if (currentConnectOptions.audio && currentConnectOptions.audio.deviceId) {
-        var localAudioTrack = await Video.createLocalAudioTrack(
+        var localAudioTrack = Video.createLocalAudioTrack(
           currentConnectOptions.audio
-        );
-
-        currentRoom.localParticipant
-          .publishTrack(localAudioTrack)
-          .then(() => resolve())
-          .catch((e) => {
-            reject(`Could not publish audio track ${e.message}`);
-          });
+        )
+          .then(() => {
+            currentRoom.localParticipant
+              .publishTrack(localAudioTrack)
+              .then(() => resolve())
+              .catch((e) => {
+                reject(`Could not publish audio track ${e.message}`);
+              });
+          })
+          .catch((e) =>
+            reject(
+              `Can't turn on audio - an issue occured when creating local audio track - ${e.message}`
+            )
+          );
       } else {
         reject("Can't turn on audio - Audio device id not found");
       }
@@ -387,15 +393,22 @@ const TwilioVideoConferenceEngine = function () {
       }
 
       if (currentConnectOptions.video && currentConnectOptions.video.deviceId) {
-        var localVideoTrack = await Video.createLocalVideoTrack(
+        var localVideoTrack = Video.createLocalVideoTrack(
           currentConnectOptions.video
-        );
-        currentRoom.localParticipant
-          .publishTrack(localVideoTrack)
-          .then(() => resolve())
-          .catch((e) => {
-            reject(`Could not publish video track - ${e.message}`);
-          });
+        )
+          .then(() => {
+            currentRoom.localParticipant
+              .publishTrack(localVideoTrack)
+              .then(() => resolve())
+              .catch((e) => {
+                reject(`Could not publish video track - ${e.message}`);
+              });
+          })
+          .catch((e) =>
+            reject(
+              `Can't turn on video - an issue occured when creating local video track - ${e.message}`
+            )
+          );
       } else {
         reject("Can't turn on video - Video device id not found");
       }
