@@ -6,9 +6,12 @@
   "author": "Bishwas Gautam",
   "scripts": {
     "lint": "eslint *.js",
-    "bundle": "browserify index.js -o dist/conferencingCoreEngine.js"
+    "bundle": "browserify index.js -o dist/conferencingCoreEngine.js",
+    "prepublish": "npm-auto-version",
+    "postpublish": "git push origin --tags"
   },
   "dependencies": {
+    "npm-auto-version": "^1.0.0",
     "twilio-video": "^2.17.1"
   },
   "devDependencies": {
