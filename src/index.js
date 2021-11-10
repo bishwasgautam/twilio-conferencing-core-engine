@@ -126,7 +126,10 @@ const TwilioVideoConferenceEngine = function () {
         if (isRemote && publication.track) {
           setupTrackMuteEvents(publication.track);
         }
-        trackSubscribed({ track: publication.track, participant });
+        trackSubscribed({
+          track: { ...publication.track, sid: publication.trackSid },
+          participant,
+        });
       }
 
       publication.on("subscribed", (track) => {
@@ -359,9 +362,9 @@ const TwilioVideoConferenceEngine = function () {
         var localAudioTrack = Video.createLocalAudioTrack(
           currentConnectOptions.audio
         )
-          .then(() => {
+          .then((track) => {
             currentRoom.localParticipant
-              .publishTrack(localAudioTrack)
+              .publishTrack(track)
               .then(() => resolve())
               .catch((e) => {
                 reject(`Could not publish audio track ${e.message}`);
