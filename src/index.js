@@ -365,9 +365,7 @@ const TwilioVideoConferenceEngine = function () {
         currentConnectOptions.audio.deviceId = deviceId;
       }
       if (currentConnectOptions.audio && currentConnectOptions.audio.deviceId) {
-        var localAudioTrack = Video.createLocalAudioTrack(
-          currentConnectOptions.audio
-        )
+        Video.createLocalAudioTrack(currentConnectOptions.audio)
           .then((track) => {
             currentRoom.localParticipant
               .publishTrack(track)
@@ -402,12 +400,10 @@ const TwilioVideoConferenceEngine = function () {
       }
 
       if (currentConnectOptions.video && currentConnectOptions.video.deviceId) {
-        var localVideoTrack = Video.createLocalVideoTrack(
-          currentConnectOptions.video
-        )
-          .then(() => {
+        Video.createLocalVideoTrack(currentConnectOptions.video)
+          .then((track) => {
             currentRoom.localParticipant
-              .publishTrack(localVideoTrack)
+              .publishTrack(track)
               .then(() => resolve())
               .catch((e) => {
                 reject(`Could not publish video track - ${e.message}`);
