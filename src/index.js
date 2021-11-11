@@ -159,11 +159,17 @@ const TwilioVideoConferenceEngine = function () {
 
     // Handle the TrackPublications that will be published by the Participant later.
     participant.on("trackPublished", (publication) => {
-      trackSubscribed({ track: publication.track, participant });
+      trackSubscribed({
+        track: { ...publication.track, sid: publication.trackSid },
+        participant,
+      });
     });
 
     participant.on("trackUnpublished", (publication) => {
-      trackUnsubscribed({ track: publication.track, participant });
+      trackUnsubscribed({
+        track: { ...publication.track, sid: publication.trackSid },
+        participant,
+      });
     });
   };
   /**
