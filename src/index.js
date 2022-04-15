@@ -101,13 +101,13 @@ const TwilioVideoConferenceEngine = function () {
    *
    * @param {any} track - media track
    */
-  const setupTrackMuteEvents = (track) => {
+  const setupTrackMuteEvents = (track, participant) => {
     if (track && track.on) {
-      track.on("disabled", ({ publication, participant }) => {
-        trackUnsubscribed({ track: publication.track, participant });
+      track.on("disabled", () => {
+        trackUnsubscribed({ track, participant });
       });
-      track.on("enabled", ({ publication, participant }) => {
-        trackSubscribed({ track: publication.track, participant });
+      track.on("enabled", () => {
+        trackSubscribed({ track, participant });
       });
     }
   };
@@ -124,7 +124,7 @@ const TwilioVideoConferenceEngine = function () {
     participant.tracks.forEach((publication) => {
       if (publication.isSubscribed || publication.track) {
         if (isRemote && publication.track) {
-          setupTrackMuteEvents(publication.track);
+          setupTrackMuteEvents(publication.track, participant);
         }
         trackSubscribed({
           track: { ...publication.track, sid: publication.trackSid },
@@ -134,7 +134,7 @@ const TwilioVideoConferenceEngine = function () {
 
       publication.on("subscribed", (track) => {
         if (isRemote) {
-          setupTrackMuteEvents(track);
+          setupTrackMuteEvents(track, participant);
         }
         trackSubscribed({ track, participant });
       });
@@ -148,7 +148,7 @@ const TwilioVideoConferenceEngine = function () {
     //listen to any future track subscribe/unsubscribe events by the participant - LOCAL
     participant.on("trackSubscribed", (track) => {
       if (isRemote) {
-        setupTrackMuteEvents(track);
+        setupTrackMuteEvents(track, participant);
       }
       trackSubscribed({ track, participant });
     });
@@ -245,8 +245,8 @@ const TwilioVideoConferenceEngine = function () {
 
           room.on("participantDisconnected", participantDisconnected);
 
-          room.on("trackSubscribed", (track) => {
-            setupTrackMuteEvents(track);
+          room.on("trackSubscribed", (track, publication, participant) => {
+            setupTrackMuteEvents(track, participant);
           });
           //Let the client know that all participants events have been initialized
           notifyOfEvent(
