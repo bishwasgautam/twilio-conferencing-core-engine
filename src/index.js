@@ -562,6 +562,7 @@ const TwilioVideoConferenceEngine = function () {
     return new Promise((resolve, reject) => {
       try {
         if (currentScreenTrack) {
+          currentRoom.localParticipant.unpublishTrack(currentScreenTrack);
           currentScreenTrack.stop();
           currentScreenTrack = null;
 
