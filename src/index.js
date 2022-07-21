@@ -439,54 +439,6 @@ const TwilioVideoConferenceEngine = function () {
       );
 
       if (localVideoTracks.length) {
-        var localVideoTrack = localVideoTracks[0].track;
-        if (localVideoTrack) {
-          try {
-            currentRoom.localParticipant.unpublishTrack(localVideoTrack);
-            localVideoTrack.stop();
-
-            //https://github.com/twilio/twilio-video.js/issues/656#issuecomment-499207086
-            //This event is not fired by default for a local participant
-            //Force fire
-            trackUnsubscribed({
-              track: { kind: MediaType.Video },
-              participant: currentRoom.localParticipant,
-            });
-
-            resolve();
-          } catch (e) {
-            reject(
-              `An error occured while stopping video track - ${e.message}`
-            );
-          }
-        } else {
-          reject("No video track info found to unpublish");
-        }
-      } else {
-        reject("No video tracks found to unpublish");
-      }
-    });
-  };
-
-  /**
-   * Turn off current audio track
-   * @returns {Promise<void>}
-   */
-  const turnOffMyAudio = async () => {
-    return new Promise((resolve, reject) => {
-      if (
-        !currentRoom ||
-        !currentRoom.localParticipant ||
-        !currentRoom.localParticipant.audioTracks
-      ) {
-        reject("Room, local participant or audio track info is missing");
-      }
-
-      var localAudioTracks = Array.from(
-        currentRoom.localParticipant.audioTracks.values()
-      );
-
-      if (localVideoTracks.length) {
         localVideoTracks.forEach(lvt => {
           var localVideoTrack = lvt.track;
           if (localVideoTrack) {
@@ -518,6 +470,56 @@ const TwilioVideoConferenceEngine = function () {
           }
         })
        
+      }else {
+        reject("No video tracks found to unpublish");
+      }
+    });
+  };
+
+  /**
+   * Turn off current audio track
+   * @returns {Promise<void>}
+   */
+  const turnOffMyAudio = async () => {
+    return new Promise((resolve, reject) => {
+      if (
+        !currentRoom ||
+        !currentRoom.localParticipant ||
+        !currentRoom.localParticipant.audioTracks
+      ) {
+        reject("Room, local participant or audio track info is missing");
+      }
+
+      var localAudioTracks = Array.from(
+        currentRoom.localParticipant.audioTracks.values()
+      );
+
+      if (localAudioTracks.length) {
+        localAudioTracks.forEach(lat => {
+          var localAudioTrack = lat.track;
+          if (localAudioTrack) {
+            try {
+              currentRoom.localParticipant.unpublishTrack(localAudioTrack);
+              localAudioTrack.stop();
+  
+              //https://github.com/twilio/twilio-video.js/issues/656#issuecomment-499207086
+              //This event is not fired by default for a local participant
+              //Force fire
+              trackUnsubscribed({
+                track: { kind: MediaType.Audio },
+                participant: currentRoom.localParticipant,
+              });
+              resolve();
+            } catch (e) {
+              reject(
+                `An error occured while stopping audio track - ${e.message}`
+              );
+            }
+          } else {
+            reject("No audio track info found to unpublish");
+          }
+        })
+      
       } else {
         reject("No audio track found to unpublish");
       }
