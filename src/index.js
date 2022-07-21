@@ -486,29 +486,38 @@ const TwilioVideoConferenceEngine = function () {
         currentRoom.localParticipant.audioTracks.values()
       );
 
-      if (localAudioTracks.length) {
-        var localAudioTrack = localAudioTracks[0].track;
-        if (localAudioTrack) {
-          try {
-            currentRoom.localParticipant.unpublishTrack(localAudioTrack);
-            localAudioTrack.stop();
+      if (localVideoTracks.length) {
+        localVideoTracks.forEach(lvt => {
+          var localVideoTrack = lvt.track;
+          if (localVideoTrack) {
+            try {
+              if(currentScreenTrack && localVideoTrack.id === currentScreenTrack.id){
+                resolve();
+                return;
+              }
 
-            //https://github.com/twilio/twilio-video.js/issues/656#issuecomment-499207086
-            //This event is not fired by default for a local participant
-            //Force fire
-            trackUnsubscribed({
-              track: { kind: MediaType.Audio },
-              participant: currentRoom.localParticipant,
-            });
-            resolve();
-          } catch (e) {
-            reject(
-              `An error occured while stopping audio track - ${e.message}`
-            );
+              currentRoom.localParticipant.unpublishTrack(localVideoTrack);
+              localVideoTrack.stop();
+  
+              //https://github.com/twilio/twilio-video.js/issues/656#issuecomment-499207086
+              //This event is not fired by default for a local participant
+              //Force fire
+              trackUnsubscribed({
+                track: { kind: MediaType.Video },
+                participant: currentRoom.localParticipant,
+              });
+  
+              resolve();
+            } catch (e) {
+              reject(
+                `An error occured while stopping video track - ${e.message}`
+              );
+            }
+          } else {
+            reject("No video track info found to unpublish");
           }
-        } else {
-          reject("No audio track info found to unpublish");
-        }
+        })
+       
       } else {
         reject("No audio track found to unpublish");
       }
