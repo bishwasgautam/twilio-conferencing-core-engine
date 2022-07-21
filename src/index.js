@@ -444,7 +444,6 @@ const TwilioVideoConferenceEngine = function () {
           if (localVideoTrack) {
             try {
               if(currentScreenTrack && localVideoTrack.id === currentScreenTrack.id){
-                resolve();
                 return;
               }
 
@@ -459,7 +458,6 @@ const TwilioVideoConferenceEngine = function () {
                 participant: currentRoom.localParticipant,
               });
   
-              resolve();
             } catch (e) {
               reject(
                 `An error occured while stopping video track - ${e.message}`
@@ -469,7 +467,7 @@ const TwilioVideoConferenceEngine = function () {
             reject("No video track info found to unpublish");
           }
         })
-       
+        resolve();
       }else {
         reject("No video tracks found to unpublish");
       }
@@ -509,7 +507,6 @@ const TwilioVideoConferenceEngine = function () {
                 track: { kind: MediaType.Audio },
                 participant: currentRoom.localParticipant,
               });
-              resolve();
             } catch (e) {
               reject(
                 `An error occured while stopping audio track - ${e.message}`
@@ -519,7 +516,7 @@ const TwilioVideoConferenceEngine = function () {
             reject("No audio track info found to unpublish");
           }
         })
-      
+        resolve();
       } else {
         reject("No audio track found to unpublish");
       }
