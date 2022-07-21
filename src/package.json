@@ -1,6 +1,6 @@
 {
   "name": "twilio-conferencing-core-engine",
-  "version": "1.9.11",
+  "version": "1.9.12",
   "description": "twilio-conferencing-core-engine",
   "main": "index.js",
   "author": "Bishwas Gautam",
